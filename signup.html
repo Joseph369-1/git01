@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign Up</title>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        background: #e8f1ff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        
+    }
+
+    .container {
+        /* lighter glass effect: reduce blur and increase opacity so background image is clearer */
+        background: rgba(255,255,255,0.14);
+        backdrop-filter: blur(4px) saturate(110%);
+        -webkit-backdrop-filter: blur(4px) saturate(110%);
+        border: 1px solid rgba(255,255,255,0.16);
+        width: 120%;
+        max-width: 420px;
+        padding: 28px;
+        border-radius: 14px;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+        text-align: center;
+    }
+
+    h2 {
+        margin-bottom: 5px;
+        font-size: 28px;
+        font-weight: 700;
+        color: #1e3a8a;
+    }
+
+    p {
+        color: #6b7280;
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+
+    input {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        font-size: 14px;
+    }
+
+    input:focus {
+        outline: none;
+        border-color: #2563eb;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        background: #1e40af;
+        color: white;
+        font-size: 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+    button:hover {
+        background: #1e3aa5;
+    }
+
+    a {
+        color: #2563eb;
+        text-decoration: none;
+    }
+    .links{
+        margin-top: 15px;
+        text-align: center;
+    }
+    .links a{
+        color: #007bff;
+        margin: 4px 0;
+        display: block;
+        font-size: 14px;
+        text-decoration: none;
+    }
+    .links a:hover{
+        text-decoration: underline;
+    }
+    .divider{
+        text-align: center;
+        margin: 40px 0;
+        line-height: 0.1em;
+        border-bottom: 1px #ddd;
+        width: 90%;
+    }
+    .divider span{
+        background: #fff;
+        color: #666;
+        font-size: 14px;
+        padding: 0 10px;
+    }
+    .social -login{
+        flex-direction: column;
+        display: flex;
+        gap: 10px;
+        width: 90%;
+    }
+    .google-bnt, .linkedIn-bnt{
+        display: flex;
+        justify-content: center;
+        padding: 10px;
+        gap: 10px;
+        border-radius: 5px;
+        align-items: center;
+        border: none;
+        font-size: 14px;
+        cursor: pointer;
+
+    }
+    .google-bnt{
+        background-color: #4285f4;
+        color: white;
+    }
+    .linkedIn-bnt{
+        background-color: #007bff;
+        color: white;
+    }
+    .google-bnt:hover{
+        background-color: #357ae8;
+    }
+    .linkedIn-bnt:hover{
+        background-color: #005983;
+    }
+    .google-bnt img, .linkedIn-bnt img{
+        width: 19px;
+        height: 18px;
+    }
+
+    .small {
+        margin-top: 15px;
+        font-size: 14px;
+    }
+</style>
+
+</head>
+<body>
+
+<div class="container">
+    <h2>Sign Up</h2>
+    <p>Create your account</p>
+
+    <input id="name" type="text" placeholder="Name">
+    <input id="username" type="text" placeholder="Username">
+    <input id="email" type="email" placeholder="Email" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" title="name@example.com" required>
+    <input id="password" type="password" placeholder="Password">
+    <input id="confirm-password" type="password" placeholder="Confirm Password">
+
+
+    <button onclick="register()">Sign Up</button>
+
+    <p class="small">Already have an account? 
+        <a href="login.html">Login</a></p>
+        <div class="divider"><span>or</span></div>
+
+    <div class="socail-login">
+        <button class="google-bnt" type="button" onclick="SigninWithGoogle()">
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google logo">
+            signin with Google
+        </button>
+        <button class="linkedIn-bnt" type="button" onclick="SigninWithLinkedIn()">
+            <img src="https://www.svgrepo.com/show/475661/linkedin-color.svg" alt="LinkedIn logo">
+            sign in with LinkedIn
+        </button>
+    </div>
+
+
+</div>
+    
+
+
+<script>
+function register() {
+    let name = document.getElementById("name").value.trim();
+    let username = document.getElementById("username").value.trim();
+    let email = document.getElementById("email").value.trim();
+    let password = document.getElementById("password").value.trim();
+    let confirmpassword = document.getElementById("confirm-password").value.trim();
+
+    if (!name || !username || !email || !password || !confirmpassword) {
+        alert("All fields are required!");
+        return;
+    }
+
+    // basic email format validation
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+        alert("Please enter a valid email address (e.g. name@example.com).");
+        return;
+    }
+
+    if (password !== confirmpassword) {
+        alert("Passwords do not match.");
+        return;
+    }
+
+    let initials = name.split(" ").map(n => n[0].toUpperCase()).join("");
+
+    let user = {
+        name,
+        username,
+        email,
+        password,
+        confirmpassword,
+        initials
+    };
+
+    localStorage.setItem("user", JSON.stringify(user));
+    localStorage.setItem("loggedIn", "true");
+
+    window.location.href = "homepage.html";
+}
+
+// Simulated OAuth sign-in. In a real app replace with real OAuth flow.
+function oauthSignIn(provider) {
+    // ask minimal info to build a local user
+    const defaultEmail = provider.toLowerCase() + ".user@example.com";
+    const name = prompt(`Sign in with ${provider}\n\nEnter the name to use:`, `${provider} User`);
+    if (!name) return alert('Sign-in cancelled.');
+
+    const email = prompt(`Sign in with ${provider}\n\nEnter the email to use:`, defaultEmail);
+    if (!email) return alert('Sign-in cancelled.');
+
+    const initials = name.split(" ").map(n => n[0].toUpperCase()).join("");
+    const username = email.split('@')[0];
+
+    const user = {
+        name,
+        username,
+        email,
+        password: "", // no password for OAuth
+        confirmpassword: "",
+        initials,
+        provider // "Google" or "LinkedIn"
+    };
+
+    localStorage.setItem("user", JSON.stringify(user));
+    localStorage.setItem("loggedIn", "true");
+
+    // redirect to app homepage
+    window.location.href = "homepage.html";
+}
+
+function SigninWithGoogle() {
+    oauthSignIn("Google");
+}
+
+function SigninWithLinkedIn() {
+    oauthSignIn("LinkedIn");
+}
+</script>
+
+</body>
+</html>

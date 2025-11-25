@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Forgot Password</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        background: #e8f1ff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+
+        background-position: center;
+        background-size: auto;
+        background-repeat: no-repeat;
+        background-image: url("https://i.ibb.co/4wgBQKpc/login.jpg");
+    }
+    .container {
+        -webkit-backdrop-filter: blur(10px) saturate(120%);
+        backdrop-filter:  saturate(125%) blur(8px);
+        border: 1px rgba(255,255,255,255,);
+        background: rgba(255,255,255,255.);
+        width: 100%;
+        max-width: 420px;
+        padding: 32px;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        text-align: center;
+    }
+    h2 { color: #1e3a8a; margin-bottom: 6px; }
+    p { color: whitesmoke; margin-bottom: 18px; }
+    input {
+        width: 100%;
+        padding: 10px 12px;
+        margin-bottom: 12px;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        font-size: 14px;
+    }
+    button {
+        width: 100%;
+        padding: 12px;
+        background: #1e40af;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 15px;
+    }
+    button.secondary {
+        background: #6b7280;
+        margin-top: 8px;
+    }
+    a { color: #1e40af; text-decoration: none; display: inline-block; margin-top: 12px; }
+    .hidden { display: none; }
+    .note { font-size:13px; color:whitesmoke; margin-bottom:8px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Reset Password</h2>
+    <p>Enter the email you use to signup.</p>
+
+    <div id="verifySection">
+        <input id="email" type="email" placeholder="Registered email">
+        <div class="note">Please enter the exact email used during sign up (case-sensitive).</div>
+        <button onclick="verifyEmail()">Verify Email</button>
+    </div>
+
+    <div id="resetSection" class="hidden">
+        <input id="newPassword" type="password" placeholder="New password">
+        <input id="confirmPassword" type="password" placeholder="Confirm new password">
+        <button onclick="setNewPassword()">Set New Password</button>
+        <button class="secondary" onclick="cancelReset()">Cancel</button>
+    </div>
+
+    <a href="login.html">Back to Login</a>
+</div>
+
+<script>
+function verifyEmail() {
+    const emailInputRaw = document.getElementById('email').value;
+    const emailInput = emailInputRaw ? emailInputRaw.trim() : '';
+    if (!emailInput) {
+        alert('Please enter your registered email.');
+        return;
+    }
+
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user || !user.email) {
+        alert('No account found. Please sign up first.');
+        return;
+    }
+
+    // Require exact match to the stored email (case-sensitive)
+    if (user.email === emailInput) {
+        // show reset form
+        document.getElementById('verifySection').classList.add('hidden');
+        document.getElementById('resetSection').classList.remove('hidden');
+        document.getElementById('newPassword').focus();
+    } else {
+        alert('Email does not match the registered email. Please enter the exact email used during sign up.');
+    }
+}
+
+function setNewPassword() {
+    const newPass = document.getElementById('newPassword').value.trim();
+    const confirm = document.getElementById('confirmPassword').value.trim();
+
+    if (!newPass || !confirm) {
+        alert('Please fill both password fields.');
+        return;
+    }
+    if (newPass.length < 6) {
+        alert('Password should be at least 6 characters.');
+        return;
+    }
+    if (newPass !== confirm) {
+        alert('Passwords do not match.');
+        return;
+    }
+
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) {
+        alert('User data not found. Please sign up again.');
+        return;
+    }
+
+    // Update stored user password
+    user.password = newPass;
+    user.confirmpassword = confirm;
+    localStorage.setItem('user', JSON.stringify(user));
+
+    alert('Password updated successfully. Please login with your email/username and new password.');
+    // ensure loggedIn is cleared so user must authenticate again
+    localStorage.setItem('loggedIn', 'false');
+    window.location.href = 'login.html';
+}
+
+function cancelReset() {
+    // clear reset inputs and go back to verify
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+    document.getElementById('resetSection').classList.add('hidden');
+    document.getElementById('verifySection').classList.remove('hidden');
+}
+</script>
+
+</body>
+</html>

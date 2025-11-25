@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payments</title>
+
+<style>
+    :root {
+        --primary: #1e40af;
+        --sidebar-bg: #1e3a8a;
+        --sidebar-text: #ffffff;
+        --bg: #f2f6ff;
+        --card-bg: #ffffff;
+        --text-dark: #1f2937;
+        --text-light: #6b7280;
+    }
+
+    .dark {
+        --sidebar-bg: #0f172a;
+        --sidebar-text: #e2e8f0;
+        --bg: #0f172a;
+        --card-bg: #1e293b;
+        --text-dark: #00060c;
+        --text-light: #94a3b8;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: var(--bg);
+        display: flex;
+        height: 100vh;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+        width: 250px;
+        background: var(--sidebar-bg);
+        color: var(--sidebar-text);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .user-box { text-align: center; margin-bottom: 30px; }
+
+    .avatar {
+        width: 60px; height: 60px;
+        background: #2563eb; color: white; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        margin: auto; font-size: 20px; font-weight: bold;
+    }
+
+    .menu { display: flex; flex-direction: column; margin-top: 20px; }
+    .menu a {
+        color: var(--sidebar-text); padding: 12px; text-decoration: none;
+        border-radius: 6px; margin-bottom: 5px;
+    }
+    .menu a:hover { background: rgba(255,255,255,0.15); }
+
+    /* CONTENT */
+    .content {
+        flex: 1;
+        padding: 25px;
+        overflow-y: auto;
+    }
+
+    .toggle {
+        float: right;
+        cursor: pointer;
+        background: var(--primary);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 6px;
+    }
+
+    h1 { color: var(--text-dark); }
+
+    .card {
+        background: var(--card-bg);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        margin-top: 20px;
+    }
+
+    /* Glassy / translucent card when dark mode is active */
+    .dark .card {
+        /* slightly translucent so background shows through */
+        background: rgba(255,255,255,0.04);
+        backdrop-filter: blur(8px) saturate(120%);
+        -webkit-backdrop-filter: blur(8px) saturate(120%);
+        border: 1px solid rgba(255,255,255,0.06);
+        box-shadow: 0 8px 24px rgba(2,6,23,0.55);
+    }
+
+    /* Inputs/selects/buttons inside glassy card should match dark glass look */
+    .dark .card input,
+    .dark .card select,
+    .dark .card textarea {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.06);
+        color: var(--text-dark);
+    }
+
+    .dark .card button {
+        background: rgba(99,102,241,0.9); /* slightly saturated button for visibility */
+        color: #fff;
+    }
+
+    /* Momo/Card detail panels also glassy in dark mode */
+    .dark .momo-details {
+        background: rgba(255,255,255,0.02);
+        border: 1px dashed rgba(255,255,255,0.04);
+    }
+
+    input, select {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 12px;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+    }
+
+    button {
+        padding: 10px 15px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    button:hover { background: #1e3a8a; }
+
+    table {
+        width: 100%;
+        margin-top: 15px;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 12px;
+        border-bottom: 1px solid #cbd5e1;
+        color: var(--text-dark);
+        text-align: left;
+    }
+
+    th { background: #4d515c; }
+
+    .action-btn {
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        color: white;
+        border: none;
+    }
+    .edit { background: #0ea5e9; }
+    .delete { background: #ef4444; }
+
+    .menu-btn {
+        display: none;
+    }
+
+    .momo-details { display: none; margin-top: 8px; padding: 8px; border: 1px dashed #cbd5e1; border-radius: 8px; background: rgba(34,197,94,0.03); }
+
+    @media(max-width:780px){
+        .sidebar {
+            position: fixed;
+            left: -260px;
+            transition: 0.3s;
+            z-index: 4;
+        }
+        .sidebar.show { left: 0; }
+        .menu-btn {
+            display: block;
+            background: var(--primary);
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: max-content;
+            margin-bottom: 15px;
+        }
+    }
+</style>
+
+</head>
+
+<body id="body">
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+    <div class="user-box">
+        <div class="avatar" id="avatar"></div>
+        <div id="username"></div>
+        <div style="font-size:13px;opacity:0.8;" id="useremail"></div>
+    </div>
+
+    <div class="menu">
+        <a href="homepage.html">Dashboard</a>
+        <a href="members.html">Member Registration</a>
+        <a href="payments.html">Payments</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="content">
+
+    <div class="menu-btn" onclick="toggleSidebar()">☰ Menu</div>
+
+    <span class="toggle" onclick="toggleDark()">🌙 / ☀️</span>
+    <h1>Payments</h1>
+
+    <div class="card">
+        <h3>Add / Edit Payment</h3>
+
+        <select id="type" onchange="togglePaymentFields()">
+            <option value="">Select Payment Type</option>
+            <option value="Momo">Momo</option>
+            <option value="Card">Card</option>
+            
+        </select>
+
+        <!-- Momo-only details -->
+        <div id="momoDetails" class="momo-details" aria-hidden="true">
+            <label style="font-size:13px;color:var(--text-light);margin-bottom:6px;display:block;">Momo Details</label>
+            <select id="momoProvider">
+                <option value="">Select Network Provider</option>
+                <option value="MTN">MTN</option>
+                <option value="Telecel">Telecel</option>
+                <option value="AirtelTigo">AirtelTigo</option>
+            </select>
+
+            <input id="momoNumber" type="tel" placeholder="Enter mobile number (e.g. 0244123456)">
+        </div>
+
+        <!-- Card-only details -->
+        <div id="cardDetails" class="momo-details" aria-hidden="true" style="display:none;">
+            <label style="font-size:13px;color:var(--text-light);margin-bottom:6px;display:block;">Card Details</label>
+            <input id="cardNumber" type="text" inputmode="numeric" placeholder="Card number (e.g. 4111 1111 1111 1111)">
+            <input id="cardName" type="text" placeholder="Full name on card">
+            <input id="cardExpiry" type="text" placeholder="Expiry (MM/YY)">
+            <input id="cardCvv" type="password" inputmode="numeric" placeholder="CVV">
+        </div>
+
+        <input id="amount" type="number" placeholder="Amount">
+        <select id="mode">
+            <option value="">Select Payment Mode</option>
+            <option value="Cash">Cash</option>
+            <option value="Transfer">Transfer</option>
+        </select>
+
+        <input id="ref" type="text" placeholder="Reference / Description">
+
+        <button onclick="savePayment()">Save Payment</button>
+    </div>
+
+
+    <div class="card">
+        <h3>Payment Records</h3>
+
+        <table id="paymentTable">
+            <thead>
+                <tr>
+                    <th>Amount</th>
+                    <th>Type</th>
+                    <th>Mode</th>
+                    <th>Provider</th>
+                    <th>Phone</th>
+                    <th>Reference</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+    </div>
+
+</div>
+
+<script>
+/* AUTH */
+let user = JSON.parse(localStorage.getItem("user"));
+if (!localStorage.getItem("loggedIn") || !user){
+    window.location.href = "login.html";
+}
+
+document.getElementById("username").textContent = user.name;
+document.getElementById("useremail").textContent = user.email;
+document.getElementById("avatar").textContent = user.initials;
+
+/* DARK MODE */
+if (localStorage.getItem("darkMode") === "true"){
+    document.getElementById("body").classList.add("dark");
+}
+function toggleDark(){
+    let body = document.getElementById("body");
+    body.classList.toggle("dark");
+    localStorage.setItem("darkMode", body.classList.contains("dark"));
+}
+
+/* SIDEBAR MOBILE */
+function toggleSidebar(){
+    document.getElementById("sidebar").classList.toggle("show");
+}
+
+
+/* PAYMENT CRUD */
+let editIndex = null;
+
+function togglePaymentFields(){
+    const type = document.getElementById('type').value;
+    const momoDiv = document.getElementById('momoDetails');
+    const cardDiv = document.getElementById('cardDetails');
+
+    if (type === 'Momo') {
+        momoDiv.style.display = 'block';
+        momoDiv.setAttribute('aria-hidden', 'false');
+
+        cardDiv.style.display = 'none';
+        cardDiv.setAttribute('aria-hidden', 'true');
+        document.getElementById('cardNumber').value = '';
+        document.getElementById('cardName').value = '';
+        document.getElementById('cardExpiry').value = '';
+        document.getElementById('cardCvv').value = '';
+    } else if (type === 'Card') {
+        cardDiv.style.display = 'block';
+        cardDiv.setAttribute('aria-hidden', 'false');
+
+        momoDiv.style.display = 'none';
+        momoDiv.setAttribute('aria-hidden', 'true');
+        document.getElementById('momoProvider').value = '';
+        document.getElementById('momoNumber').value = '';
+    } else {
+        // hide both and clear
+        momoDiv.style.display = 'none';
+        momoDiv.setAttribute('aria-hidden', 'true');
+        cardDiv.style.display = 'none';
+        cardDiv.setAttribute('aria-hidden', 'true');
+
+        document.getElementById('momoProvider').value = '';
+        document.getElementById('momoNumber').value = '';
+        document.getElementById('cardNumber').value = '';
+        document.getElementById('cardName').value = '';
+        document.getElementById('cardExpiry').value = '';
+        document.getElementById('cardCvv').value = '';
+    }
+}
+
+function loadPayments(){
+    let payments = JSON.parse(localStorage.getItem("payments") || "[]");
+    let tbody = document.querySelector("#paymentTable tbody");
+    tbody.innerHTML = "";
+
+    payments.forEach((p, i) => {
+        tbody.innerHTML += `
+            <tr>
+                <td>${p.amount}</td>
+                <td>${p.type}</td>
+                <td>${p.mode}</td>
+                <td>${p.provider || ''}</td>
+                <td>${p.phone || ''}</td>
+                <td>${p.ref}</td>
+                <td>
+                    <button class="action-btn edit" onclick="editPayment(${i})">Edit</button>
+                    <button class="action-btn delete" onclick="deletePayment(${i})">Delete</button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+function savePayment(){
+    let amount = document.getElementById("amount").value.trim();
+    let type = document.getElementById("type").value.trim();
+    let mode = document.getElementById("mode").value.trim();
+    let ref = document.getElementById("ref").value.trim();
+
+    // If Momo selected require provider and phone
+    let provider = '';
+    let phone = '';
+    if (type === 'Momo') {
+        provider = document.getElementById("momoProvider").value.trim();
+        phone = document.getElementById("momoNumber").value.trim();
+        if (!provider) {
+            alert('Please select network provider for Momo.');
+            return;
+        }
+        if (!phone) {
+            alert('Please enter your mobile number for Momo.');
+            return;
+        }
+    }
+
+    // If Card selected require card details
+    let cardNumber = '';
+    let cardName = '';
+    let cardExpiry = '';
+    let cardCvv = '';
+    if (type === 'Card') {
+        cardNumber = document.getElementById("cardNumber").value.replace(/\s+/g, '').trim();
+        cardName = document.getElementById("cardName").value.trim();
+        cardExpiry = document.getElementById("cardExpiry").value.trim();
+        cardCvv = document.getElementById("cardCvv").value.trim();
+
+        if (!cardNumber || !/^\d{13,19}$/.test(cardNumber)) {
+            alert('Please enter a valid card number (13-19 digits).');
+            return;
+        }
+        if (!cardName) {
+            alert('Please enter the full name on the card.');
+            return;
+        }
+        if (!cardExpiry || !/^(0[1-9]|1[0-2])\/\d{2}$/.test(cardExpiry)) {
+            alert('Please enter expiry in MM/YY format.');
+            return;
+        }
+        if (!cardCvv || !/^\d{3,4}$/.test(cardCvv)) {
+            alert('Please enter a valid CVV (3 or 4 digits).');
+            return;
+        }
+    }
+
+    if (!amount || !type || !mode || !ref){
+        alert("Amount, Type, Mode and Reference are required!");
+        return;
+    }
+
+    let payments = JSON.parse(localStorage.getItem("payments") || "[]");
+    let payment = { amount, type, mode, ref };
+
+    if (type === 'Momo') {
+        payment.provider = provider;
+        payment.phone = phone;
+    }
+
+    if (type === 'Card') {
+        payment.cardNumber = cardNumber;
+        payment.cardName = cardName;
+        payment.cardExpiry = cardExpiry;
+        // Note: storing CVV is sensitive — avoid in production. Stored here only for demo.
+        payment.cardCvv = cardCvv;
+    }
+
+    if (editIndex === null){
+        payments.push(payment);
+    } else {
+        payments[editIndex] = payment;
+        editIndex = null;
+    }
+
+    localStorage.setItem("payments", JSON.stringify(payments));
+
+    // clear inputs
+    document.getElementById("amount").value = "";
+    document.getElementById("type").value = "";
+    document.getElementById("mode").value = "";
+    document.getElementById("ref").value = "";
+    document.getElementById("momoProvider").value = "";
+    document.getElementById("momoNumber").value = "";
+    document.getElementById("cardNumber").value = "";
+    document.getElementById("cardName").value = "";
+    document.getElementById("cardExpiry").value = "";
+    document.getElementById("cardCvv").value = "";
+
+    // hide detail areas after save
+    togglePaymentFields();
+
+    loadPayments();
+}
+
+function editPayment(i){
+    let payments = JSON.parse(localStorage.getItem("payments") || "[]");
+    let p = payments[i];
+
+    document.getElementById("amount").value = p.amount;
+    document.getElementById("type").value = p.type;
+
+    // show fields according to type
+    togglePaymentFields();
+
+    if (p.provider) document.getElementById("momoProvider").value = p.provider;
+    if (p.phone) document.getElementById("momoNumber").value = p.phone;
+
+    if (p.cardNumber) document.getElementById("cardNumber").value = p.cardNumber;
+    if (p.cardName) document.getElementById("cardName").value = p.cardName;
+    if (p.cardExpiry) document.getElementById("cardExpiry").value = p.cardExpiry;
+    if (p.cardCvv) document.getElementById("cardCvv").value = p.cardCvv;
+
+    document.getElementById("mode").value = p.mode;
+    document.getElementById("ref").value = p.ref;
+
+    editIndex = i;
+}
+
+function deletePayment(i){
+    let payments = JSON.parse(localStorage.getItem("payments") || "[]");
+    payments.splice(i, 1);
+    localStorage.setItem("payments", JSON.stringify(payments));
+    loadPayments();
+}
+
+loadPayments();
+
+/* LOGOUT */
+function logout(){
+    localStorage.setItem("loggedIn", "false");
+    window.location.href = "login.html";
+}
+</script>

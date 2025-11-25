@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Members</title>
+
+<style>
+:root {
+    --primary: #1e40af;
+    --primary-light: #2563eb;
+    --sidebar-bg: #1e3a8a;
+    --sidebar-text: #ffffff;
+    --bg: #f2f6ff;
+    --card-bg: #ffffff;
+    --text-dark: #1f2937;
+    --text-med: #374151;
+    --text-light: #6b7280;
+}
+
+.dark {
+    --sidebar-bg: #0f172a;
+    --sidebar-text: #e2e8f0;
+    --bg: #0f172a;
+    --card-bg: #1e293b;
+    --text-dark: #f1f5f9;
+    --text-med: #cbd5e1;
+    --text-light: #94a3b8;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: var(--bg);
+    display: flex;
+    height: 100vh;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 250px;
+    background: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    padding: 20px;
+}
+
+.menu-btn { display:none; }
+
+.user-box { text-align: center; margin-bottom: 30px; }
+.avatar {
+    width:60px;height:60px;border-radius:50%;
+    background:var(--primary); color:white;
+    display:flex;align-items:center;justify-content:center;
+    margin:auto;font-weight:bold;font-size:20px;
+}
+.menu a{
+    color:white;text-decoration:none;display:block;
+    padding:12px;border-radius:6px;margin-bottom:5px;
+}
+.menu a:hover{ background:rgba(255,255,255,0.2); }
+
+/* CONTENT */
+.content {
+    flex:1;
+    padding:25px;
+    overflow-y:auto;
+}
+
+h1 { color:var(--text-dark); }
+
+.toggle{
+    float:right;background:var(--primary);color:white;
+    padding:6px 12px;border-radius:6px;cursor:pointer;
+}
+
+/* CARD */
+.card{
+    background:var(--card-bg);
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.1);
+    margin-bottom:20px;
+}
+
+/* FORM */
+input, select {
+    width:100%;padding:10px;margin-bottom:12px;
+    border:1px solid #cbd5e1;border-radius:6px;
+}
+
+button{
+    background:var(--primary);color:white;
+    padding:10px 15px;border:none;border-radius:6px;
+    cursor:pointer;
+}
+button:hover{ background:#1e3a8a; }
+
+.action-btn{
+    padding:5px 10px;color:white;border:none;border-radius:4px;
+    cursor:pointer;
+}
+.edit{ background:#0ea5e9; }
+.delete{ background:#ef4444; }
+
+/* TABLE */
+table{
+    width:100%; border-collapse:collapse;
+}
+th, td{
+    padding:12px;border-bottom:1px solid #cbd5e1;
+    color:var(--text-dark);
+}
+th{
+    background:#e0e7ff;cursor:pointer;
+}
+
+/* SEARCH + FILTERS */
+.tools{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:15px;
+}
+
+#search{
+    flex:1;
+}
+
+#filterLocation{
+    width:200px;
+}
+
+/* IMPORT BUTTON */
+#importCSV{
+    background:#059669;
+}
+#importCSV:hover{ background:#047857; }
+
+.export{
+    background:#10b981;
+}
+.export:hover{ background:#0d9a72; }
+
+/* RESPONSIVE */
+@media(max-width:780px){
+    .sidebar{
+        position:fixed;left:-260px;transition:.3s;z-index:4;
+    }
+    .sidebar.show{ left:0; }
+    .menu-btn{
+        display:block;background:var(--primary);
+        color:white;padding:10px 15px;border-radius:6px;
+        width:max-content;margin-bottom:15px;
+        cursor:pointer;
+    }
+}
+</style>
+</head>
+
+<body id="body">
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+    <div class="user-box">
+        <div class="avatar" id="avatar"></div>
+        <div id="username"></div>
+        <div id="useremail" style="font-size:13px;opacity:0.7;"></div>
+    </div>
+
+    <div class="menu">
+        <a href="homepage.html">Dashboard</a>
+        <a href="members.html">Member Registration</a>
+        <a href="payments.html">Payments</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+<div class="menu-btn" onclick="toggleSidebar()">☰ Menu</div>
+<span class="toggle" onclick="toggleDark()">🌙 / ☀️</span>
+
+<h1>Members</h1>
+
+<!-- ADD / EDIT FORM -->
+<div class="card">
+    <h3>Add / Edit Member</h3>
+
+    <input type="text" id="name" placeholder="Full Name">
+    <input type="date" id="dob">
+    <input type="email" id="email" placeholder="Email">
+    <input type="text" id="location" placeholder="Location">
+
+    <button onclick="saveMember()">Save Member</button>
+</div>
+
+<!-- SEARCH / FILTERS / IMPORT EXPORT -->
+<div class="card">
+
+    <div class="tools">
+        <input type="text" id="search" placeholder="Search members by name, email, location">
+        
+        <select id="filterLocation">
+            <option value="">Filter by location</option>
+        </select>
+
+        <button class="export" onclick="exportCSV()">Export CSV</button>
+        <button id="importCSV" onclick="document.getElementById('fileInput').click()">Import CSV</button>
+        <input type="file" id="fileInput" accept=".csv" style="display:none" onchange="importCSV(event)">
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th onclick="sortTable('name')">Name</th>
+                <th onclick="sortTable('dob')">DOB</th>
+                <th onclick="sortTable('email')">Email</th>
+                <th onclick="sortTable('location')">Location</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="memberTable"></tbody>
+    </table>
+
+</div>
+
+</div>
+
+<script>
+/* USER CHECK */
+let user = JSON.parse(localStorage.getItem("user"));
+if (!localStorage.getItem("loggedIn") || !user){
+    window.location.href = "login.html";
+}
+document.getElementById("username").textContent = user.name;
+document.getElementById("useremail").textContent = user.email;
+document.getElementById("avatar").textContent = user.initials;
+
+/* DARK MODE */
+if (localStorage.getItem("darkMode")==="true"){
+    document.getElementById("body").classList.add("dark");
+}
+function toggleDark(){
+    let b=document.getElementById("body");
+    b.classList.toggle("dark");
+    localStorage.setItem("darkMode", b.classList.contains("dark"));
+}
+
+/* SIDEBAR MOBILE */
+function toggleSidebar(){
+    document.getElementById("sidebar").classList.toggle("show");
+}
+
+/* MEMBERS CRUD */
+let editIndex = null;
+let sortField = "";
+let sortAsc = true;
+
+function loadMembers(){
+    let members = JSON.parse(localStorage.getItem("members") || "[]");
+
+    // Filter by search
+    let search = document.getElementById("search").value.toLowerCase();
+    members = members.filter(m =>
+        m.name.toLowerCase().includes(search) ||
+        m.email.toLowerCase().includes(search) ||
+        m.location.toLowerCase().includes(search)
+    );
+
+    // Filter by location
+    let locationFilter = document.getElementById("filterLocation").value;
+    if (locationFilter){
+        members = members.filter(m => m.location === locationFilter);
+    }
+
+    // Sorting
+    if (sortField){
+        members.sort((a,b)=>{
+            if (a[sortField] < b[sortField]) return sortAsc ? -1 : 1;
+            if (a[sortField] > b[sortField]) return sortAsc ? 1 : -1;
+            return 0;
+        });
+    }
+
+    // Fill table
+    let tbody = document.getElementById("memberTable");
+    tbody.innerHTML = "";
+    members.forEach((m,i)=>{
+        tbody.innerHTML += `
+        <tr>
+            <td>${m.name}</td>
+            <td>${m.dob}</td>
+            <td>${m.email}</td>
+            <td>${m.location}</td>
+            <td>
+                <button class="action-btn edit" onclick="editMember(${i})">Edit</button>
+                <button class="action-btn delete" onclick="deleteMember(${i})">Delete</button>
+            </td>
+        </tr>
+        `;
+    });
+}
+
+function saveMember(){
+    let name = document.getElementById("name").value.trim();
+    let dob = document.getElementById("dob").value;
+    let email = document.getElementById("email").value.trim();
+    let location = document.getElementById("location").value.trim();
+
+    if (!name || !dob || !email || !location){
+        alert("Please fill all fields!");
+        return;
+    }
+
+    let members = JSON.parse(localStorage.getItem("members") || "[]");
+    let data = { name, dob, email, location };
+
+    if (editIndex === null) members.push(data);
+    else members[editIndex] = data;
+
+    localStorage.setItem("members", JSON.stringify(members));
+
+    editIndex=null;
+    document.getElementById("name").value="";
+    document.getElementById("dob").value="";
+    document.getElementById("email").value="";
+    document.getElementById("location").value="";
+
+    populateLocationFilter();
+    loadMembers();
+}
+
+function editMember(i){
+    let members = JSON.parse(localStorage.getItem("members") || "[]");
+    let m = members[i];
+
+    editIndex = i;
+
+    document.getElementById("name").value = m.name;
+    document.getElementById("dob").value = m.dob;
+    document.getElementById("email").value = m.email;
+    document.getElementById("location").value = m.location;
+}
+
+function deleteMember(i){
+    let members = JSON.parse(localStorage.getItem("members") || "[]");
+    members.splice(i,1);
+    localStorage.setItem("members", JSON.stringify(members));
+    populateLocationFilter();
+    loadMembers();
+}
+
+/* SORTING */
+function sortTable(field){
+    if (sortField === field){
+        sortAsc = !sortAsc;
+    } else {
+        sortField = field;
+        sortAsc = true;
+    }
+    loadMembers();
+}
+
+/* POPULATE LOCATION FILTER */
+function populateLocationFilter(){
+    let members = JSON.parse(localStorage.getItem("members") || "[]");
+    let locations = [...new Set(members.map(m=>m.location))];
+
+    let s = document.getElementById("filterLocation");
+    s.innerHTML = `<option value="">Filter by location</option>`;
+    locations.forEach(loc=>{
+        s.innerHTML += `<option value="${loc}">${loc}</option>`;
+    });
+}
+
+/* CSV EXPORT */
+function exportCSV(){
+    let members = JSON.parse(localStorage.getItem("members") || "[]");
+    let csv = "Name,DOB,Email,Location\n";
+    members.forEach(m=>{
+        csv += `${m.name},${m.dob},${m.email},${m.location}\n`;
+    });
+
+    let blob = new Blob([csv], {type:"text/csv"});
+    let a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "members.csv";
+    a.click();
+}
+
+/* CSV IMPORT */
+function importCSV(event){
+    let file = event.target.files[0];
+    if (!file) return;
+
+    let reader = new FileReader();
+    reader.onload = function(e){
+        let lines = e.target.result.split("\n").slice(1);
+
+        let members = JSON.parse(localStorage.getItem("members") || "[]");
+
+        lines.forEach(line=>{
+            let [name,dob,email,location] = line.split(",");
+            if (name && dob && email && location){
+                members.push({name, dob, email, location});
+            }
+        });
+
+        localStorage.setItem("members", JSON.stringify(members));
+        populateLocationFilter();
+        loadMembers();
+    };
+    reader.readAsText(file);
+}
+
+document.getElementById("search").oninput = loadMembers;
+document.getElementById("filterLocation").onchange = loadMembers;
+
+populateLocationFilter();
+loadMembers();
+
+/* LOGOUT */
+function logout(){
+    localStorage.setItem("loggedIn","false");
+    location.href = "login.html";
+}
+</script>
+
+</body>
+</html>
